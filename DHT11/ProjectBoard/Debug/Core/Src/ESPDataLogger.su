@@ -1,0 +1,4 @@
+../Core/Src/ESPDataLogger.c:15:6:bufclr	24	static
+../Core/Src/ESPDataLogger.c:22:6:ESP_Init	96	static
+../Core/Src/ESPDataLogger.c:62:6:ESP_Send_Data	168	static
+../Core/Src/ESPDataLogger.c:89:6:ESP_Send_Multi	768	static

@@ -1,0 +1,8 @@
+C:/Users/Ezzy/Desktop/College/UPD Year 3/2nd Semester/EEE 192/dht again/ProjectBoard-20240516T053127Z-001/ProjectBoard/F4_chip_headers/CMSIS/Include/core_cm4.h:1939:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../Core/Src/main.c:84:5:main	8	static
+../Core/Src/main.c:130:6:SystemClock_Config	88	static
+../Core/Src/main.c:172:13:MX_USART1_UART_Init	8	static
+../Core/Src/main.c:205:13:MX_GPIO_Init	16	static
+../Core/Src/main.c:225:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:236:6:Tim2_Init	4	static
+../Core/Src/main.c:252:6:TIM2_IRQHandler	8	static

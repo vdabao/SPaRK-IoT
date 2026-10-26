@@ -1,0 +1,88 @@
+channelID = *******;
+alertApiKey = '********';
+alertUrl="https://api.thingspeak.com/alerts/send";
+options = weboptions("HeaderFields", ["ThingSpeak-Alerts-API-Key", alertApiKey ]);
+ 
+% Read the recent data.
+temp_data = thingSpeakRead(channelID,'NumDays',30,'Fields',1); %Field - 2 for Temp, 3 for Gas
+humid_data = thingSpeakRead(channelID,'NumDays',30,'Fields',2); %Field - 2 for Temp, 3 for Gas
+gas_data = thingSpeakRead(channelID,'NumDays',30,'Fields',3); %Field - 2 for Temp, 3 for Gas
+ 
+% Check to make sure the data was read correctly from the channel.
+if isempty(temp_data) | isempty(humid_data) | isempty(gas_data)
+  alertBody = ' No data has been read. ';  
+else
+  % Set the threshold.
+ 
+  % temp threshold
+  temp_mtncValue = 32; %for LM35
+  temp_fireValue = 43; %for LM35
+ 
+  % Get the most recent point in the array of data.
+  temp_lastValue = temp_data(end);
+ 
+ 
+  % humidity threshold
+  humid_span = max(humid_data) - min(humid_data); %This is only for my implementation
+  humid_mtncValue = (0.2 * humid_span) + max(humid_data); %Maintenance
+  humid_fireValue = 15; %Fire
+ 
+  humid_lastValue = humid_data(end);
+ 
+  % gas threshold
+  gas_mtncValue = 520 
+  gas_lastValue = gas_data(end);
+ 
+  % Set the outgoing message
+ 
+  % all values are triggered
+  % cross checking humidity, temperature, and gas values
+  if (humid_lastValue <= humid_fireValue)
+      if (temp_lastValue >= temp_fireValue)
+          if gas_lastValue >= gas_mtncValue
+              alertSubject = sprintf("Possibility of Explosion");
+              alertBody = ' HIGH ALERT! Temperature is abnormally high! Humidity is abnormally low. Presence of combustible gas is also detected! IF POSSIBLE, DO NOT APPROACH THE AREA! ';
+              webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+          else
+              alertSubject = sprintf("Risk of Fire");
+              alertBody = ' DANGER! Temperature is abnormally high! Humidity is abnormally low. Check for any sources of fire! ';
+              webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+          end
+      end
+ 
+  % checking gas values for maintenance
+  elseif (gas_lastValue >= gas_mtncValue)
+      alertSubject = sprintf("Gas alert");
+      alertBody = ' DANGER! The MQ2 has detected the presence of gas. Look for the source immediately! ';
+      webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+     
+  % checking humidity values for maintenance
+  elseif (humid_lastValue >= humid_mtncValue)
+      alertSubject = sprintf("Humidity alert");
+      alertBody = ' CAUTION! The humidity of the room is abnormally high. Please maintain proper humidity levels. ';
+      webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+         
+  % checking temperature values
+  elseif (temp_lastValue >= temp_mtncValue)
+      if (temp_lastValue>=temp_fireValue)
+          % checking for fire
+          if gas_lastValue >= gas_mtncValue
+              alertSubject = sprintf("Possibility of Explosion");
+              alertBody = ' HIGH ALERT! Temperature is abnormally high! Presence of combustible gas is also detected! IF POSSIBLE, DO NOT APPROACH THE AREA! ';
+              webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+          else
+              alertSubject = sprintf("Fire Alert");
+              alertBody = ' DANGER! Temperature is abnormally high! Check for any sources of fire! ';
+              webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+          end
+      else
+          % temp maintenance
+          alertSubject = sprintf("Temperature alert");
+          alertBody = ' CAUTION! The temperature of the room has seen a significant spike. Please maintain proper temperature levels. ';
+          webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+      end
+     
+  else
+      alertBody = ' No significant readings have been observed. ';
+  end
+end
